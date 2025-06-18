@@ -41,8 +41,8 @@ jobs:
     - name: Run PHPStan
       run: composer stan
     
-    - name: Run Security Checker
-      run: composer security-check
+    - name: Run Composer Audit
+      run: composer audit
     
     - name: Run tests
       run: composer test

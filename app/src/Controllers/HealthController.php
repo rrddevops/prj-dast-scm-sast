@@ -17,7 +17,12 @@ class HealthController
             'timestamp' => date('c'),
         ];
 
-        $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
+        $jsonData = json_encode($data, JSON_PRETTY_PRINT);
+        if ($jsonData === false) {
+            $jsonData = '{"error": "Failed to encode JSON"}';
+        }
+
+        $response->getBody()->write($jsonData);
 
         return $response->withHeader('Content-Type', 'application/json');
     }

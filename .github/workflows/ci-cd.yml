@@ -98,6 +98,8 @@ jobs:
           -Dsonar.tests=app/tests
           -Dsonar.php.coverage.reportPaths=coverage.xml
           -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
+          -Dsonar.qualitygate.wait=true
+          -Dsonar.qualitygate.name=Quality-RRD
 
   snyk-security:
     runs-on: ubuntu-latest

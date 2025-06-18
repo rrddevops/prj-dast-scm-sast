@@ -12,9 +12,13 @@
         </testsuite>
     </testsuites>
     <coverage>
-        <includeDirectory suffix=".php">app/src</includeDirectory>
-        <excludeDirectory>vendor</excludeDirectory>
-        <excludeDirectory>app/tests</excludeDirectory>
+        <include>
+            <directory suffix=".php">app/src</directory>
+        </include>
+        <exclude>
+            <directory>vendor</directory>
+            <directory>app/tests</directory>
+        </exclude>
         <report>
             <html outputDirectory="coverage"/>
             <clover outputFile="coverage.xml"/>

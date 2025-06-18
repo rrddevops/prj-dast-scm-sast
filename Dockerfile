@@ -1,32 +1,34 @@
-# Usar imagem oficial do Node.js
-FROM node:18-alpine
+# Usar imagem oficial do Python
+FROM python:3.11-slim
 
 # Definir diretório de trabalho
 WORKDIR /app
 
-# Copiar arquivos de dependências
-COPY package*.json ./
+# Instalar dependências do sistema
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-# Instalar dependências
-RUN npm ci --only=production && npm cache clean --force
+# Copiar arquivos de dependências
+COPY requirements.txt .
+
+# Instalar dependências Python
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copiar código da aplicação
 COPY . .
 
 # Criar usuário não-root para segurança
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nodejs -u 1001
-
-# Mudar propriedade dos arquivos para o usuário nodejs
-RUN chown -R nodejs:nodejs /app
-USER nodejs
+RUN adduser --disabled-password --gecos '' appuser
+RUN chown -R appuser:appuser /app
+USER appuser
 
 # Expor porta
 EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node healthcheck.js
+  CMD python healthcheck.py
 
 # Comando para iniciar a aplicação
-CMD ["npm", "start"] 
+CMD ["gunicorn", "--bind", "0.0.0.0:3000", "--workers", "4", "src.app:app"] 

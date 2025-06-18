@@ -1,21 +1,22 @@
 # DAST/SCM/SAST Application
 
-Aplicação web com esteira completa de validação de código incluindo análise SAST (SonarQube), análise de vulnerabilidades (Snyk) e testes DAST (OWASP ZAP).
+Aplicação web Python/Flask com esteira completa de validação de código incluindo análise SAST (SonarQube), análise de vulnerabilidades (Snyk) e testes DAST (OWASP ZAP).
 
 ## 🚀 Funcionalidades
 
-- **API REST** com Express.js
+- **API REST** com Flask
 - **Containerização** com Docker
 - **Esteira CI/CD** com GitHub Actions
 - **Análise SAST** com SonarQube Cloud
 - **Análise de vulnerabilidades** com Snyk
 - **Testes DAST** com OWASP ZAP
-- **Testes automatizados** com Jest
-- **Linting e formatação** com ESLint e Prettier
+- **Testes automatizados** com pytest
+- **Linting e formatação** com flake8 e black
+- **Análise de segurança** com bandit e safety
 
 ## 📋 Pré-requisitos
 
-- Node.js 18+
+- Python 3.11+
 - Docker
 - Git
 
@@ -28,11 +29,17 @@ Aplicação web com esteira completa de validação de código incluindo anális
 git clone <repository-url>
 cd prj-dast-scm-sast
 
+# Crie um ambiente virtual
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# ou
+venv\Scripts\activate  # Windows
+
 # Instale as dependências
-npm install
+pip install -r requirements.txt
 
 # Execute em modo desenvolvimento
-npm run dev
+python src/app.py
 ```
 
 ### Com Docker
@@ -59,27 +66,31 @@ docker-compose up app
 
 ```bash
 # Executar testes
-npm test
+pytest
 
 # Executar testes com coverage
-npm test -- --coverage
+pytest --cov=src --cov-report=html
 
 # Executar linting
-npm run lint
+flake8 src/
+
+# Executar formatação
+black --check src/
 
 # Executar auditoria de segurança
-npm run security-check
+bandit -r src/
+safety check
 ```
 
 ## 🔧 Scripts Disponíveis
 
-- `npm start` - Inicia a aplicação em produção
-- `npm run dev` - Inicia a aplicação em desenvolvimento com hot reload
-- `npm test` - Executa os testes
-- `npm run lint` - Executa o ESLint
-- `npm run lint:fix` - Corrige automaticamente problemas do ESLint
-- `npm run format` - Formata o código com Prettier
-- `npm run security-check` - Executa auditoria de segurança
+- `python src/app.py` - Inicia a aplicação em desenvolvimento
+- `gunicorn --bind 0.0.0.0:3000 src.app:app` - Inicia a aplicação em produção
+- `pytest` - Executa os testes
+- `flake8 src/` - Executa o linting
+- `black src/` - Formata o código
+- `bandit -r src/` - Executa auditoria de segurança
+- `safety check` - Verifica vulnerabilidades em dependências
 
 ## 🌐 Endpoints da API
 
@@ -87,6 +98,7 @@ npm run security-check
 - `GET /health` - Status de saúde da aplicação
 - `GET /api/users` - Lista de usuários
 - `POST /api/users` - Criar novo usuário
+- `GET /api/users/<id>` - Buscar usuário específico
 
 ## 🔒 Esteira de Segurança
 
@@ -106,6 +118,14 @@ npm run security-check
 - Análise de vulnerabilidades em runtime
 - Relatórios detalhados
 
+### Bandit (Análise de Segurança Python)
+- Detecção de vulnerabilidades específicas do Python
+- Análise de código estático
+
+### Safety (Verificação de Dependências)
+- Verificação de vulnerabilidades conhecidas
+- Alertas de segurança
+
 ## ⚙️ Configuração do GitHub Actions
 
 ### Secrets Necessários
@@ -122,50 +142,54 @@ Configure os seguintes secrets no seu repositório GitHub:
 O workflow executa automaticamente:
 
 1. **Code Quality** - Linting, testes e auditoria
-2. **SonarQube Analysis** - Análise SAST
-3. **Snyk Security Scan** - Análise de vulnerabilidades
-4. **OWASP ZAP Security Test** - Testes DAST
-5. **Docker Build** - Build e push da imagem
-6. **Deploy** - Deploy para ambiente de staging
+2. **Snyk Security Scan** - Análise de vulnerabilidades
+3. **OWASP ZAP Security Test** - Testes DAST
+4. **Docker Build** - Build e push da imagem
+5. **Deploy** - Deploy para ambiente de staging
 
 ## 📁 Estrutura do Projeto
 
 ```
 prj-dast-scm-sast/
 ├── src/
-│   ├── app.js              # Aplicação principal
-│   └── app.test.js         # Testes da aplicação
+│   ├── app.py              # Aplicação principal Flask
+│   └── test_app.py         # Testes da aplicação
 ├── .github/workflows/
 │   └── ci-cd.yml           # Workflow do GitHub Actions
 ├── Dockerfile              # Configuração do Docker
 ├── docker-compose.yml      # Configuração do Docker Compose
-├── package.json            # Dependências e scripts
-├── jest.config.js          # Configuração do Jest
-├── .eslintrc.js            # Configuração do ESLint
-├── .prettierrc             # Configuração do Prettier
+├── requirements.txt        # Dependências Python
+├── setup.py               # Configuração do pacote
+├── pytest.ini             # Configuração do pytest
+├── .flake8                # Configuração do flake8
+├── pyproject.toml         # Configuração do black
 ├── sonar-project.properties # Configuração do SonarQube
-├── snyk.json               # Configuração do Snyk
-└── README.md               # Documentação
+├── snyk.json              # Configuração do Snyk
+└── README.md              # Documentação
 ```
 
 ## 🔧 Configuração de Desenvolvimento
 
 ### VS Code Extensions Recomendadas
 
-- ESLint
-- Prettier
+- Python
+- Pylance
+- Black Formatter
+- Flake8
 - Docker
-- Jest Runner
+- Python Test Explorer
 
 ### Configurações do VS Code
 
 ```json
 {
+  "python.defaultInterpreterPath": "./venv/bin/python",
+  "python.formatting.provider": "black",
+  "python.linting.enabled": true,
+  "python.linting.flake8Enabled": true,
   "editor.formatOnSave": true,
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
-  },
-  "eslint.validate": ["javascript"]
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false
 }
 ```
 
@@ -174,7 +198,7 @@ prj-dast-scm-sast/
 A aplicação inclui endpoints de monitoramento:
 
 - `/health` - Health check para Docker e load balancers
-- Logs estruturados com Morgan
+- Logs estruturados
 - Métricas de performance
 
 ## 🚀 Deploy

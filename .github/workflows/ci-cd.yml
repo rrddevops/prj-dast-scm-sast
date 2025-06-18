@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 env:
-  NODE_VERSION: '18'
+  PYTHON_VERSION: '3.11'
   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
@@ -23,23 +23,31 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
+    - name: Setup Python
+      uses: actions/setup-python@v4
       with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
 
     - name: Install dependencies
-      run: npm ci
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
-    - name: Run linting
-      run: npm run lint
+    - name: Run linting with flake8
+      run: flake8 src/ --count --select=E9,F63,F7,F82 --show-source --statistics
+
+    - name: Run formatting check with black
+      run: black --check src/
 
     - name: Run tests
-      run: npm test
+      run: pytest src/ --cov=src --cov-report=xml
 
-    - name: Run security audit
-      run: npm audit --audit-level=moderate
+    - name: Run security audit with bandit
+      run: bandit -r src/ -f json -o bandit-report.json || true
+
+    - name: Run safety check
+      run: safety check --json --output safety-report.json || true
 
   # Job de análise de vulnerabilidades com Snyk
   snyk-security:
@@ -51,24 +59,26 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
+    - name: Setup Python
+      uses: actions/setup-python@v4
       with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
 
     - name: Install dependencies
-      run: npm ci
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
     - name: Run Snyk to check for vulnerabilities
-      uses: snyk/actions/node@master
+      uses: snyk/actions/python@master
       env:
         SNYK_TOKEN: ${{ env.SNYK_TOKEN }}
       with:
         args: --severity-threshold=high
 
     - name: Run Snyk to check for license issues
-      uses: snyk/actions/node@master
+      uses: snyk/actions/python@master
       env:
         SNYK_TOKEN: ${{ env.SNYK_TOKEN }}
       with:
@@ -84,22 +94,21 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
+    - name: Setup Python
+      uses: actions/setup-python@v4
       with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
 
     - name: Install dependencies
-      run: npm ci
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
     - name: Start application
-      run: npm start &
-      env:
-        PORT: 3000
-
-    - name: Wait for application to start
-      run: sleep 10
+      run: |
+        python src/app.py &
+        sleep 10
 
     - name: Run OWASP ZAP Baseline Scan
       uses: zaproxy/action-baseline@v0.8.0

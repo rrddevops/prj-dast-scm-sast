@@ -148,6 +148,7 @@ jobs:
       with:
         target: 'http://localhost'
         cmd_options: '-a'
+        docker_name: 'owasp/zap2docker-stable:2023-11-06'
     
     - name: Stop application
       if: always()

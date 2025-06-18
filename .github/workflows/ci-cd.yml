@@ -78,12 +78,11 @@ jobs:
       run: composer test-coverage
     
     - name: SonarQube Scan
-      uses: SonarSource/sonarqube-quality-gate-action@master
+      uses: SonarSource/sonarqube-scan-action@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       with:
-        scannerHome: ${{ github.workspace }}/.sonar/scanner
         args: >
           -Dsonar.projectKey=rrddevops_prj-dast-scm-sast
           -Dsonar.sources=app/src
@@ -148,7 +147,6 @@ jobs:
       uses: zaproxy/action-baseline@v0.8.0
       with:
         target: 'http://localhost'
-        rules_file_name: '.zap/rules.tsv'
         cmd_options: '-a'
     
     - name: Stop application

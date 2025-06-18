@@ -4,11 +4,11 @@
     
     <rule ref="PSR12"/>
     
-    <file>src</file>
-    <file>tests</file>
+    <file>app/src</file>
+    <file>app/tests</file>
     
     <exclude-pattern>vendor/*</exclude-pattern>
-    <exclude-pattern>logs/*</exclude-pattern>
+    <exclude-pattern>app/logs/*</exclude-pattern>
     
     <arg name="colors"/>
     <arg name="parallel" value="75"/>

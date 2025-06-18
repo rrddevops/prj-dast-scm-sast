@@ -1,4 +1,4 @@
-name: CI/CD Pipeline with Security Scanning
+name: CI/CD Pipeline
 
 on:
   push:
@@ -6,173 +6,149 @@ on:
   pull_request:
     branches: [ main ]
 
-env:
-  PHP_VERSION: '8.2'
-  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
 jobs:
-  # Job de qualidade de código e testes
   code-quality:
-    name: Code Quality & Tests
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
+    - uses: actions/checkout@v4
+    
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: ${{ env.PHP_VERSION }}
+        php-version: '8.2'
         extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, iconv, json, mbstring, pdo
         coverage: xdebug
-
-    - name: Install Composer
-      run: composer self-update
-
+    
+    - name: Cache Composer packages
+      id: composer-cache
+      uses: actions/cache@v3
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-
+    
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress
-
-    - name: Run linting with PHP_CodeSniffer
-      run: vendor/bin/phpcs src/ --standard=PSR12
-
-    - name: Run formatting check with PHP CS Fixer
-      run: vendor/bin/php-cs-fixer fix --dry-run --diff src/
-
+    
+    - name: Run PHP CS Fixer
+      run: composer format
+    
+    - name: Run PHP CodeSniffer
+      run: composer lint
+    
+    - name: Run PHPStan
+      run: composer stan
+    
+    - name: Run Security Checker
+      run: composer security-check
+    
     - name: Run tests
-      run: vendor/bin/phpunit --coverage-clover=coverage.xml
+      run: composer test
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: true
 
-    - name: Run static analysis with PHPStan
-      run: vendor/bin/phpstan analyse src/ --level=8
-
-    - name: Run security audit with Security Checker
-      run: vendor/bin/security-checker security:check composer.lock
-
-  # Job de análise de vulnerabilidades com Snyk
-  snyk-security:
-    name: Snyk Security Scan
+  sonarqube:
     runs-on: ubuntu-latest
     needs: code-quality
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: ${{ env.PHP_VERSION }}
-
-    - name: Install Composer
-      run: composer self-update
-
+        php-version: '8.2'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, iconv, json, mbstring, pdo
+        coverage: xdebug
+    
+    - name: Cache Composer packages
+      uses: actions/cache@v3
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-
+    
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress
+    
+    - name: Run tests with coverage
+      run: composer test-coverage
+    
+    - name: SonarQube Scan
+      uses: SonarSource/sonarqube-quality-gate-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      with:
+        scannerHome: ${{ github.workspace }}/.sonar/scanner
+        args: >
+          -Dsonar.projectKey=rrddevops_prj-dast-scm-sast
+          -Dsonar.sources=app/src
+          -Dsonar.tests=app/tests
+          -Dsonar.php.coverage.reportPaths=coverage.xml
+          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
 
+  snyk-security:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
     - name: Run Snyk to check for vulnerabilities
       uses: snyk/actions/php@master
       env:
-        SNYK_TOKEN: ${{ env.SNYK_TOKEN }}
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
         args: --severity-threshold=high
 
-    - name: Run Snyk to check for license issues
-      uses: snyk/actions/php@master
-      env:
-        SNYK_TOKEN: ${{ env.SNYK_TOKEN }}
-      with:
-        args: --severity-threshold=high --license-check
-
-  # Job de análise DAST com OWASP ZAP
   zap-security:
-    name: OWASP ZAP Security Test
     runs-on: ubuntu-latest
-    needs: code-quality
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: ${{ env.PHP_VERSION }}
-
-    - name: Install Composer
-      run: composer self-update
-
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
-
-    - name: Start application
+    - uses: actions/checkout@v4
+    
+    - name: Build and start application
       run: |
-        docker-compose up -d app-dev
-        sleep 15
-
+        docker-compose up -d
+        sleep 30
+    
     - name: Run OWASP ZAP Baseline Scan
       uses: zaproxy/action-baseline@v0.8.0
       with:
-        target: 'http://localhost:8080'
+        target: 'http://localhost'
+        rules_file_name: '.zap/rules.tsv'
         cmd_options: '-a'
-
-    - name: Run OWASP ZAP Full Scan
-      uses: zaproxy/action-full-scan@v0.8.0
-      with:
-        target: 'http://localhost:8080'
-        cmd_options: '-a'
-
-    - name: Upload ZAP results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v3
+    
+    - name: Stop application
       if: always()
-      with:
-        sarif_file: 'zap-report.sarif'
+      run: docker-compose down
 
-  # Job de build e push da imagem Docker
-  docker-build:
-    name: Build and Push Docker Image
+  build-and-deploy:
     runs-on: ubuntu-latest
-    needs: [snyk-security, zap-security]
+    needs: [code-quality, sonarqube, snyk-security, zap-security]
     if: github.ref == 'refs/heads/main'
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-
-    - name: Login to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        push: true
-        tags: |
-          ${{ secrets.DOCKER_USERNAME }}/dast-scm-sast-app:latest
-          ${{ secrets.DOCKER_USERNAME }}/dast-scm-sast-app:${{ github.sha }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-
-  # Job de deploy (exemplo para ambiente de staging)
-  deploy-staging:
-    name: Deploy to Staging
-    runs-on: ubuntu-latest
-    needs: docker-build
-    if: github.ref == 'refs/heads/main'
-    environment: staging
+    - uses: actions/checkout@v4
     
-    steps:
-    - name: Deploy to staging environment
+    - name: Build Docker image
+      run: docker build -t dast-scm-sast-app .
+    
+    - name: Run container tests
       run: |
-        echo "Deploying to staging environment..."
-        # Aqui você pode adicionar comandos específicos para seu ambiente
-        # Por exemplo: kubectl apply, docker-compose up, etc.
-        echo "Deployment completed successfully!" 
+        docker run -d --name test-app -p 8080:80 dast-scm-sast-app
+        sleep 10
+        curl -f http://localhost:8080/health
+        docker stop test-app
+        docker rm test-app 

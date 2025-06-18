@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Controllers;
 
-use PHPUnit\Framework\TestCase;
 use App\Controllers\UserController;
-use Slim\Psr7\Factory\ServerRequestFactory;
+use PHPUnit\Framework\TestCase;
 use Slim\Psr7\Factory\ResponseFactory;
+use Slim\Psr7\Factory\ServerRequestFactory;
 
 class UserControllerTest extends TestCase
 {
@@ -33,7 +33,7 @@ class UserControllerTest extends TestCase
         $this->assertEquals('application/json', $result->getHeaderLine('Content-Type'));
 
         $data = json_decode((string) $result->getBody(), true);
-        
+
         $this->assertIsArray($data);
         $this->assertNotEmpty($data);
         $this->assertArrayHasKey('id', $data[0]);
@@ -54,7 +54,7 @@ class UserControllerTest extends TestCase
         $this->assertEquals('application/json', $result->getHeaderLine('Content-Type'));
 
         $data = json_decode((string) $result->getBody(), true);
-        
+
         $this->assertArrayHasKey('id', $data);
         $this->assertEquals($userData['name'], $data['name']);
         $this->assertEquals($userData['email'], $data['email']);
@@ -70,7 +70,7 @@ class UserControllerTest extends TestCase
         $result = $this->controller->store($request, $response);
 
         $this->assertEquals(400, $result->getStatusCode());
-        
+
         $data = json_decode((string) $result->getBody(), true);
         $this->assertArrayHasKey('error', $data);
     }
@@ -86,7 +86,7 @@ class UserControllerTest extends TestCase
         $this->assertEquals('application/json', $result->getHeaderLine('Content-Type'));
 
         $data = json_decode((string) $result->getBody(), true);
-        
+
         $this->assertEquals(1, $data['id']);
         $this->assertArrayHasKey('name', $data);
         $this->assertArrayHasKey('email', $data);
@@ -100,7 +100,7 @@ class UserControllerTest extends TestCase
         $result = $this->controller->show($request, $response, ['id' => 999]);
 
         $this->assertEquals(404, $result->getStatusCode());
-        
+
         $data = json_decode((string) $result->getBody(), true);
         $this->assertArrayHasKey('error', $data);
     }

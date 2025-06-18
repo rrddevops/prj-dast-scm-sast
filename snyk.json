@@ -1,7 +1,0 @@
-{
-  "version": "1.0.0",
-  "ignore": [],
-  "policy": "snyk-policy.json",
-  "severity": "high",
-  "failOn": "high"
-} 

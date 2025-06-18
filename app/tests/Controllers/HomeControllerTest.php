@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Controllers;
 
-use PHPUnit\Framework\TestCase;
 use App\Controllers\HomeController;
-use Slim\Psr7\Factory\ServerRequestFactory;
+use PHPUnit\Framework\TestCase;
 use Slim\Psr7\Factory\ResponseFactory;
+use Slim\Psr7\Factory\ServerRequestFactory;
 
 class HomeControllerTest extends TestCase
 {

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use Slim\App;
-use Slim\Routing\RouteCollectorProxy;
+use App\Controllers\HealthController;
 use App\Controllers\HomeController;
 use App\Controllers\UserController;
-use App\Controllers\HealthController;
+use Slim\App;
+use Slim\Routing\RouteCollectorProxy;
 
 return function (App $app) {
     // Rota principal

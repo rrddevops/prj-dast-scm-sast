@@ -27,22 +27,24 @@
     },
     "autoload": {
         "psr-4": {
-            "App\\": "src/"
+            "App\\": "app/src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/"
+            "Tests\\": "app/tests/"
         }
     },
     "scripts": {
         "test": "phpunit",
         "test-coverage": "phpunit --coverage-html coverage",
-        "lint": "phpcs src/",
-        "lint-fix": "phpcbf src/",
-        "format": "php-cs-fixer fix src/",
+        "lint": "phpcs app/src/",
+        "lint-fix": "phpcbf app/src/",
+        "format": "php-cs-fixer fix app/src/",
+        "format-check": "php-cs-fixer fix --dry-run --diff app/src/",
         "security-check": "security-checker security:check composer.lock",
-        "stan": "phpstan analyse src/ --level=8"
+        "stan": "phpstan analyse app/src/ --level=8",
+        "fix-all": "php-cs-fixer fix app/src/ app/tests/ && phpcbf app/src/"
     },
     "config": {
         "optimize-autoloader": true,

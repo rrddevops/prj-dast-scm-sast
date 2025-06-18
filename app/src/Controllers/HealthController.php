@@ -14,10 +14,11 @@ class HealthController
         $data = [
             'status' => 'healthy',
             'uptime' => time(),
-            'timestamp' => date('c')
+            'timestamp' => date('c'),
         ];
-        
+
         $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
+
         return $response->withHeader('Content-Type', 'application/json');
     }
 } 

@@ -38,7 +38,7 @@ composer install
 cp .env.example .env
 
 # Execute em modo desenvolvimento
-php -S localhost:8000 -t public
+php -S localhost:8000 -t app/public
 ```
 
 ### Com Docker
@@ -153,20 +153,22 @@ O workflow executa automaticamente:
 
 ```
 prj-dast-scm-sast/
-├── src/
-│   └── Controllers/
-│       ├── HomeController.php
-│       ├── HealthController.php
-│       └── UserController.php
-├── tests/
-│   └── Controllers/
-│       ├── HomeControllerTest.php
-│       └── UserControllerTest.php
-├── public/
-│   └── index.php
-├── config/
-│   ├── container.php
-│   └── routes.php
+├── app/
+│   ├── src/
+│   │   └── Controllers/
+│   │       ├── HomeController.php
+│   │       ├── HealthController.php
+│   │       └── UserController.php
+│   ├── tests/
+│   │   └── Controllers/
+│   │       ├── HomeControllerTest.php
+│   │       └── UserControllerTest.php
+│   ├── public/
+│   │   └── index.php
+│   ├── config/
+│   │   ├── container.php
+│   │   └── routes.php
+│   └── logs/
 ├── docker/
 │   ├── nginx.conf
 │   └── start.sh

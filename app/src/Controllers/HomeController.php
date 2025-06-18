@@ -15,10 +15,11 @@ class HomeController
             'message' => 'Bem-vindo à aplicação DAST/SCM/SAST',
             'version' => '1.0.0',
             'status' => 'online',
-            'timestamp' => date('c')
+            'timestamp' => date('c'),
         ];
-        
+
         $response->getBody()->write(json_encode($data, JSON_PRETTY_PRINT));
+
         return $response->withHeader('Content-Type', 'application/json');
     }
 } 

@@ -127,6 +127,18 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, iconv, json, mbstring, pdo
+    
+    - name: Install Composer
+      run: composer self-update
+    
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress
+    
     - name: Build and start application
       run: |
         docker compose up -d

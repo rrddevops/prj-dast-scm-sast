@@ -129,7 +129,7 @@ jobs:
     
     - name: Build and start application
       run: |
-        docker-compose up -d
+        docker compose up -d
         sleep 30
     
     - name: Run OWASP ZAP Baseline Scan
@@ -141,7 +141,7 @@ jobs:
     
     - name: Stop application
       if: always()
-      run: docker-compose down
+      run: docker compose down
 
   build-and-deploy:
     runs-on: ubuntu-latest

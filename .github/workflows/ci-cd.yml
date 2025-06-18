@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 env:
-  PYTHON_VERSION: '3.11'
+  PHP_VERSION: '8.2'
   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
@@ -23,31 +23,33 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Setup Python
-      uses: actions/setup-python@v4
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        cache: 'pip'
+        php-version: ${{ env.PHP_VERSION }}
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, iconv, json, mbstring, pdo
+        coverage: xdebug
+
+    - name: Install Composer
+      run: composer self-update
 
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      run: composer install --prefer-dist --no-progress
 
-    - name: Run linting with flake8
-      run: flake8 src/ --count --select=E9,F63,F7,F82 --show-source --statistics
+    - name: Run linting with PHP_CodeSniffer
+      run: vendor/bin/phpcs src/ --standard=PSR12
 
-    - name: Run formatting check with black
-      run: black --check src/
+    - name: Run formatting check with PHP CS Fixer
+      run: vendor/bin/php-cs-fixer fix --dry-run --diff src/
 
     - name: Run tests
-      run: pytest src/ --cov=src --cov-report=xml
+      run: vendor/bin/phpunit --coverage-clover=coverage.xml
 
-    - name: Run security audit with bandit
-      run: bandit -r src/ -f json -o bandit-report.json || true
+    - name: Run static analysis with PHPStan
+      run: vendor/bin/phpstan analyse src/ --level=8
 
-    - name: Run safety check
-      run: safety check --json --output safety-report.json || true
+    - name: Run security audit with Security Checker
+      run: vendor/bin/security-checker security:check composer.lock
 
   # Job de análise de vulnerabilidades com Snyk
   snyk-security:
@@ -59,26 +61,26 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup Python
-      uses: actions/setup-python@v4
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        cache: 'pip'
+        php-version: ${{ env.PHP_VERSION }}
+
+    - name: Install Composer
+      run: composer self-update
 
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      run: composer install --prefer-dist --no-progress
 
     - name: Run Snyk to check for vulnerabilities
-      uses: snyk/actions/python@master
+      uses: snyk/actions/php@master
       env:
         SNYK_TOKEN: ${{ env.SNYK_TOKEN }}
       with:
         args: --severity-threshold=high
 
     - name: Run Snyk to check for license issues
-      uses: snyk/actions/python@master
+      uses: snyk/actions/php@master
       env:
         SNYK_TOKEN: ${{ env.SNYK_TOKEN }}
       with:
@@ -94,32 +96,32 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup Python
-      uses: actions/setup-python@v4
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        cache: 'pip'
+        php-version: ${{ env.PHP_VERSION }}
+
+    - name: Install Composer
+      run: composer self-update
 
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      run: composer install --prefer-dist --no-progress
 
     - name: Start application
       run: |
-        python src/app.py &
-        sleep 10
+        docker-compose up -d app-dev
+        sleep 15
 
     - name: Run OWASP ZAP Baseline Scan
       uses: zaproxy/action-baseline@v0.8.0
       with:
-        target: 'http://localhost:3000'
+        target: 'http://localhost:8080'
         cmd_options: '-a'
 
     - name: Run OWASP ZAP Full Scan
       uses: zaproxy/action-full-scan@v0.8.0
       with:
-        target: 'http://localhost:3000'
+        target: 'http://localhost:8080'
         cmd_options: '-a'
 
     - name: Upload ZAP results to GitHub Security tab

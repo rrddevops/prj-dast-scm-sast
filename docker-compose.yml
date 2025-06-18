@@ -4,13 +4,14 @@ services:
   app:
     build: .
     ports:
-      - "3000:3000"
+      - "80:80"
     environment:
-      - FLASK_ENV=production
-      - PORT=3000
-      - SECRET_KEY=your-secret-key-here
+      - APP_ENV=production
+      - APP_DEBUG=false
+    volumes:
+      - ./logs:/var/www/html/logs
     healthcheck:
-      test: ["CMD", "python", "healthcheck.py"]
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -19,12 +20,17 @@ services:
   app-dev:
     build: .
     ports:
-      - "3001:3000"
+      - "8080:80"
     environment:
-      - FLASK_ENV=development
-      - PORT=3000
-      - SECRET_KEY=dev-secret-key
+      - APP_ENV=development
+      - APP_DEBUG=true
     volumes:
-      - ./src:/app/src
-      - ./requirements.txt:/app/requirements.txt
-    command: python -m flask run --host=0.0.0.0 --port=3000 
+      - ./src:/var/www/html/src
+      - ./config:/var/www/html/config
+      - ./public:/var/www/html/public
+      - ./composer.json:/var/www/html/composer.json
+      - ./logs:/var/www/html/logs
+    command: >
+      sh -c "composer install &&
+             php-fpm &
+             nginx -g 'daemon off;'" 

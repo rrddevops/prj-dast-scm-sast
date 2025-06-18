@@ -155,6 +155,11 @@ Thumbs.db
 zap-report.sarif
 snyk-report.json
 
+# Composer
+/vendor/
+composer.phar
+composer.lock
+
 # Python
 __pycache__/
 *.py[cod]

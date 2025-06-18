@@ -1,22 +1,24 @@
 # DAST/SCM/SAST Application
 
-Aplicação web Python/Flask com esteira completa de validação de código incluindo análise SAST (SonarQube), análise de vulnerabilidades (Snyk) e testes DAST (OWASP ZAP).
+Aplicação web PHP/Slim com esteira completa de validação de código incluindo análise SAST (SonarQube), análise de vulnerabilidades (Snyk) e testes DAST (OWASP ZAP).
 
 ## 🚀 Funcionalidades
 
-- **API REST** com Flask
+- **API REST** com Slim Framework
 - **Containerização** com Docker
 - **Esteira CI/CD** com GitHub Actions
 - **Análise SAST** com SonarQube Cloud
 - **Análise de vulnerabilidades** com Snyk
 - **Testes DAST** com OWASP ZAP
-- **Testes automatizados** com pytest
-- **Linting e formatação** com flake8 e black
-- **Análise de segurança** com bandit e safety
+- **Testes automatizados** com PHPUnit
+- **Linting e formatação** com PHP_CodeSniffer e PHP CS Fixer
+- **Análise estática** com PHPStan
+- **Análise de segurança** com Security Checker
 
 ## 📋 Pré-requisitos
 
-- Python 3.11+
+- PHP 8.2+
+- Composer
 - Docker
 - Git
 
@@ -29,17 +31,14 @@ Aplicação web Python/Flask com esteira completa de validação de código incl
 git clone <repository-url>
 cd prj-dast-scm-sast
 
-# Crie um ambiente virtual
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# ou
-venv\Scripts\activate  # Windows
-
 # Instale as dependências
-pip install -r requirements.txt
+composer install
+
+# Configure as variáveis de ambiente
+cp .env.example .env
 
 # Execute em modo desenvolvimento
-python src/app.py
+php -S localhost:8000 -t public
 ```
 
 ### Com Docker
@@ -49,7 +48,7 @@ python src/app.py
 docker build -t dast-scm-sast-app .
 
 # Executar container
-docker run -p 3000:3000 dast-scm-sast-app
+docker run -p 80:80 dast-scm-sast-app
 ```
 
 ### Com Docker Compose
@@ -66,31 +65,33 @@ docker-compose up app
 
 ```bash
 # Executar testes
-pytest
+composer test
 
 # Executar testes com coverage
-pytest --cov=src --cov-report=html
+composer test-coverage
 
 # Executar linting
-flake8 src/
+composer lint
 
 # Executar formatação
-black --check src/
+composer format
+
+# Executar análise estática
+composer stan
 
 # Executar auditoria de segurança
-bandit -r src/
-safety check
+composer security-check
 ```
 
 ## 🔧 Scripts Disponíveis
 
-- `python src/app.py` - Inicia a aplicação em desenvolvimento
-- `gunicorn --bind 0.0.0.0:3000 src.app:app` - Inicia a aplicação em produção
-- `pytest` - Executa os testes
-- `flake8 src/` - Executa o linting
-- `black src/` - Formata o código
-- `bandit -r src/` - Executa auditoria de segurança
-- `safety check` - Verifica vulnerabilidades em dependências
+- `composer test` - Executa os testes
+- `composer test-coverage` - Executa testes com coverage
+- `composer lint` - Executa o linting
+- `composer lint-fix` - Corrige automaticamente problemas de linting
+- `composer format` - Formata o código
+- `composer stan` - Executa análise estática
+- `composer security-check` - Executa auditoria de segurança
 
 ## 🌐 Endpoints da API
 
@@ -98,7 +99,7 @@ safety check
 - `GET /health` - Status de saúde da aplicação
 - `GET /api/users` - Lista de usuários
 - `POST /api/users` - Criar novo usuário
-- `GET /api/users/<id>` - Buscar usuário específico
+- `GET /api/users/{id}` - Buscar usuário específico
 
 ## 🔒 Esteira de Segurança
 
@@ -118,11 +119,12 @@ safety check
 - Análise de vulnerabilidades em runtime
 - Relatórios detalhados
 
-### Bandit (Análise de Segurança Python)
-- Detecção de vulnerabilidades específicas do Python
-- Análise de código estático
+### PHPStan (Análise Estática)
+- Detecção de erros em tempo de compilação
+- Análise de tipos
+- Verificação de código morto
 
-### Safety (Verificação de Dependências)
+### Security Checker (Verificação de Dependências)
 - Verificação de vulnerabilidades conhecidas
 - Alertas de segurança
 
@@ -152,44 +154,57 @@ O workflow executa automaticamente:
 ```
 prj-dast-scm-sast/
 ├── src/
-│   ├── app.py              # Aplicação principal Flask
-│   └── test_app.py         # Testes da aplicação
+│   └── Controllers/
+│       ├── HomeController.php
+│       ├── HealthController.php
+│       └── UserController.php
+├── tests/
+│   └── Controllers/
+│       ├── HomeControllerTest.php
+│       └── UserControllerTest.php
+├── public/
+│   └── index.php
+├── config/
+│   ├── container.php
+│   └── routes.php
+├── docker/
+│   ├── nginx.conf
+│   └── start.sh
 ├── .github/workflows/
-│   └── ci-cd.yml           # Workflow do GitHub Actions
-├── Dockerfile              # Configuração do Docker
-├── docker-compose.yml      # Configuração do Docker Compose
-├── requirements.txt        # Dependências Python
-├── setup.py               # Configuração do pacote
-├── pytest.ini             # Configuração do pytest
-├── .flake8                # Configuração do flake8
-├── pyproject.toml         # Configuração do black
-├── sonar-project.properties # Configuração do SonarQube
-├── snyk.json              # Configuração do Snyk
-└── README.md              # Documentação
+│   └── ci-cd.yml
+├── Dockerfile
+├── docker-compose.yml
+├── composer.json
+├── phpunit.xml
+├── phpcs.xml
+├── phpstan.neon
+├── sonar-project.properties
+└── README.md
 ```
 
 ## 🔧 Configuração de Desenvolvimento
 
 ### VS Code Extensions Recomendadas
 
-- Python
-- Pylance
-- Black Formatter
-- Flake8
+- PHP Intelephense
+- PHP Debug
+- PHP CS Fixer
+- PHP Sniffer
 - Docker
-- Python Test Explorer
+- PHP Test Explorer
 
 ### Configurações do VS Code
 
 ```json
 {
-  "python.defaultInterpreterPath": "./venv/bin/python",
-  "python.formatting.provider": "black",
-  "python.linting.enabled": true,
-  "python.linting.flake8Enabled": true,
-  "editor.formatOnSave": true,
-  "python.testing.pytestEnabled": true,
-  "python.testing.unittestEnabled": false
+  "php.validate.enable": true,
+  "php.suggest.basic": false,
+  "phpcs.standard": "PSR12",
+  "php-cs-fixer.executablePath": "vendor/bin/php-cs-fixer",
+  "php-cs-fixer.onsave": true,
+  "php-cs-fixer.config": ".php-cs-fixer.php",
+  "phpunit.php": "vendor/bin/phpunit",
+  "phpunit.phpunit": "vendor/bin/phpunit"
 }
 ```
 
@@ -198,7 +213,7 @@ prj-dast-scm-sast/
 A aplicação inclui endpoints de monitoramento:
 
 - `/health` - Health check para Docker e load balancers
-- Logs estruturados
+- Logs estruturados com Monolog
 - Métricas de performance
 
 ## 🚀 Deploy
@@ -213,7 +228,7 @@ docker build -t dast-scm-sast-app:latest .
 docker push your-registry/dast-scm-sast-app:latest
 
 # Deploy
-docker run -d -p 3000:3000 --name dast-app dast-scm-sast-app:latest
+docker run -d -p 80:80 --name dast-app dast-scm-sast-app:latest
 ```
 
 ## 📝 Licença

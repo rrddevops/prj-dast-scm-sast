@@ -1,6 +1,5 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from flask_helmet import Helmet
 import os
 import time
 from datetime import datetime
@@ -17,7 +16,17 @@ app.config['JSON_SORT_KEYS'] = False
 
 # Middleware de segurança
 CORS(app)
-Helmet(app)
+
+# Headers de segurança
+@app.after_request
+def add_security_headers(response):
+    """Adiciona headers de segurança à resposta"""
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    response.headers['Content-Security-Policy'] = "default-src 'self'"
+    return response
 
 # Dados simulados de usuários
 users = [

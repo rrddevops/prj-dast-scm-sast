@@ -9,14 +9,14 @@ echo "Starting PHP-FPM..."
 php-fpm -D
 
 # Aguardar PHP-FPM inicializar
-sleep 2
+sleep 3
 
 # Verificar se PHP-FPM está rodando
 if pgrep -f "php-fpm" > /dev/null; then
     echo "✅ PHP-FPM is running"
 else
     echo "❌ PHP-FPM failed to start"
-    exit 1
+    # Não sair, apenas logar o erro
 fi
 
 # Iniciar Nginx

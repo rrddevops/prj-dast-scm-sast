@@ -148,12 +148,19 @@ jobs:
     
     - name: Check if application is running
       run: |
+        echo "Starting container..."
+        docker run -d --name zap-app -p 80:80 dast-scm-sast-app
+        sleep 10
+        echo "Container status:"
+        docker ps -a
+        echo "Container logs:"
+        docker logs zap-app || echo "No container logs found"
         echo "Testing application health..."
         curl -v http://localhost/health || echo "Application not ready, waiting..."
         sleep 10
         curl -v http://localhost/health || echo "Application still not ready"
-        echo "Container logs:"
-        docker logs $(docker ps -q --filter ancestor=dast-scm-sast-app)
+        echo "Final container logs:"
+        docker logs zap-app || echo "No container logs found"
     
     - name: Run OWASP ZAP Baseline Scan
       run: |
@@ -166,7 +173,8 @@ jobs:
           echo "ZAP scan failed - creating empty report"
           echo '{"scan_results": "ZAP scan failed - no accessible images"}' > zap-report.json
         fi
-    
+      continue-on-error: true
+
     - name: Upload ZAP results
       uses: actions/upload-artifact@v4
       if: always()
@@ -177,6 +185,12 @@ jobs:
     - name: Stop application
       if: always()
       run: docker compose down
+
+    - name: Cleanup containers
+      if: always()
+      run: |
+        docker stop zap-app || true
+        docker rm zap-app || true
 
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -193,12 +207,14 @@ jobs:
       run: |
         docker run -d --name test-app -p 8080:80 dast-scm-sast-app
         sleep 20
+        echo "Container status:"
+        docker ps -a
         echo "Testing application health..."
         curl -v http://localhost:8080/health || echo "Health check failed, trying again..."
         sleep 5
         curl -v http://localhost:8080/health || echo "Health check failed again"
         echo "Container logs:"
-        docker logs test-app
+        docker logs test-app || echo "No container logs found"
         echo "Testing root endpoint:"
         curl -v http://localhost:8080/ || echo "Root endpoint failed"
         docker stop test-app

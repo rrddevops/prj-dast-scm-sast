@@ -80,17 +80,35 @@ jobs:
     - name: Check SonarCloud project exists
       run: |
         echo "Checking if SonarCloud project exists..."
-        if curl -s -H "Authorization: Bearer ${{ secrets.SONAR_TOKEN }}" \
-          "https://sonarcloud.io/api/projects/search?projects=${{ secrets.SONAR_ORGANIZATION }}_prj-dast-scm-sast" | \
-          grep -q "total.*0"; then
-          echo "Project does not exist, creating..."
-          curl -X POST \
+        echo "Organization: ${{ secrets.SONAR_ORGANIZATION }}"
+        echo "Project Key: rrddevops_prj-dast-scm-sast"
+        
+        # Check if project exists
+        PROJECT_CHECK=$(curl -s -H "Authorization: Bearer ${{ secrets.SONAR_TOKEN }}" \
+          "https://sonarcloud.io/api/projects/search?projects=rrddevops_prj-dast-scm-sast" 2>/dev/null || echo "API_ERROR")
+        
+        if echo "$PROJECT_CHECK" | grep -q "total.*0" || echo "$PROJECT_CHECK" | grep -q "API_ERROR"; then
+          echo "Project does not exist or API error, creating..."
+          
+          # Create project
+          CREATE_RESPONSE=$(curl -X POST \
             -H "Authorization: Bearer ${{ secrets.SONAR_TOKEN }}" \
             -H "Content-Type: application/x-www-form-urlencoded" \
             -d "name=DAST SCM SAST Application&project=rrddevops_prj-dast-scm-sast&organization=${{ secrets.SONAR_ORGANIZATION }}" \
-            "https://sonarcloud.io/api/projects/create"
+            "https://sonarcloud.io/api/projects/create" 2>/dev/null || echo "CREATE_ERROR")
+          
+          echo "Create response: $CREATE_RESPONSE"
+          
+          if echo "$CREATE_RESPONSE" | grep -q "CREATE_ERROR"; then
+            echo "❌ Failed to create project via API"
+            echo "Please create the project manually at: https://sonarcloud.io"
+            echo "Project Key: rrddevops_prj-dast-scm-sast"
+            echo "Organization: ${{ secrets.SONAR_ORGANIZATION }}"
+          else
+            echo "✅ Project created successfully"
+          fi
         else
-          echo "Project already exists"
+          echo "✅ Project already exists"
         fi
       continue-on-error: true
     

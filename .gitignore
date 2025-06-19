@@ -88,7 +88,6 @@ temp/
 # Logs
 logs
 *.log
-app/logs/*.log
 
 # Runtime data
 pids
@@ -159,7 +158,7 @@ snyk-report.json
 # Composer
 /vendor/
 composer.phar
-# composer.lock - Keep this file for reproducible builds
+composer.lock
 
 # Python
 __pycache__/

@@ -22,8 +22,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 
 # Copiar arquivos de dependências
-COPY composer.json ./
-COPY composer.lock* ./
+COPY composer.json composer.lock ./
 
 # Instalar dependências
 RUN composer install --no-dev --optimize-autoloader --no-interaction

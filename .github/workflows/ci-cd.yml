@@ -85,6 +85,7 @@ jobs:
       with:
         args: >
           -Dsonar.projectKey=rrddevops_prj-dast-scm-sast
+          -Dsonar.organization=rrddevops
           -Dsonar.sources=app/src
           -Dsonar.tests=app/tests
           -Dsonar.php.coverage.reportPaths=coverage.xml

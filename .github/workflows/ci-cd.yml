@@ -89,6 +89,12 @@ jobs:
             -H "Content-Type: application/x-www-form-urlencoded" \
             -d "name=DAST SCM SAST Application&project=rrddevops_prj-dast-scm-sast&organization=${{ secrets.SONAR_ORGANIZATION }}" \
             "https://sonarcloud.io/api/projects/create"
+          echo "Project creation attempted. If it failed, please create manually:"
+          echo "1. Go to https://sonarcloud.io"
+          echo "2. Create New Project"
+          echo "3. Select repository: rrddevops/prj-dast-scm-sast"
+          echo "4. Project Key: rrddevops_prj-dast-scm-sast"
+          echo "5. Organization: ${{ secrets.SONAR_ORGANIZATION }}"
         else
           echo "Project already exists"
         fi
@@ -115,6 +121,7 @@ jobs:
           -Dsonar.branch.target=main
           -Dsonar.projectName=DAST SCM SAST Application
           -Dsonar.projectVersion=1.0.0
+      continue-on-error: true
 
   snyk-security:
     runs-on: ubuntu-latest

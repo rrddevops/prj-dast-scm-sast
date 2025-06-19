@@ -108,11 +108,13 @@ jobs:
           -Dsonar.php.coverage.reportPaths=coverage.xml
           -Dsonar.coverage.minimum=80
           -Dsonar.php.coverage.minimum=80
-          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL || 'https://sonarcloud.io' }}
+          -Dsonar.host.url=https://sonarcloud.io
           -Dsonar.qualitygate.wait=true
           -Dsonar.qualitygate.name=Quality-RRD
           -Dsonar.branch.name=${{ github.ref_name }}
           -Dsonar.branch.target=main
+          -Dsonar.projectName="DAST SCM SAST Application"
+          -Dsonar.projectVersion=1.0.0
 
   snyk-security:
     runs-on: ubuntu-latest

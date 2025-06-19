@@ -94,6 +94,8 @@ jobs:
           -Dsonar.host.url=${{ secrets.SONAR_HOST_URL || 'https://sonarcloud.io' }}
           -Dsonar.qualitygate.wait=true
           -Dsonar.qualitygate.name=Quality-RRD
+          -Dsonar.branch.name=${{ github.ref_name }}
+          -Dsonar.branch.target=main
 
   snyk-security:
     runs-on: ubuntu-latest

@@ -33,11 +33,6 @@ COPY . .
 # Criar diretório de logs
 RUN mkdir -p app/logs && chmod 755 app/logs
 
-# Verificar estrutura da aplicação
-RUN ls -la /var/www/html && \
-    ls -la /var/www/html/public && \
-    ls -la /var/www/html/app/config
-
 # Configurar permissões
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html \
@@ -45,6 +40,9 @@ RUN chown -R www-data:www-data /var/www/html \
 
 # Configurar Nginx
 COPY docker/nginx.conf /etc/nginx/sites-available/default
+
+# Verificar se os arquivos essenciais existem
+RUN test -f /var/www/html/public/index.php && echo "✅ index.php found" || echo "❌ index.php missing"
 
 # Expor porta
 EXPOSE 80

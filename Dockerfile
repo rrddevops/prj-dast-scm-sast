@@ -33,6 +33,11 @@ COPY . .
 # Criar diretório de logs
 RUN mkdir -p app/logs && chmod 755 app/logs
 
+# Verificar estrutura da aplicação
+RUN ls -la /var/www/html && \
+    ls -la /var/www/html/public && \
+    ls -la /var/www/html/app/config
+
 # Configurar permissões
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html \

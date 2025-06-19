@@ -77,6 +77,23 @@ jobs:
     - name: Run tests with coverage
       run: composer test-coverage
     
+    - name: Check SonarCloud project exists
+      run: |
+        echo "Checking if SonarCloud project exists..."
+        if curl -s -H "Authorization: Bearer ${{ secrets.SONAR_TOKEN }}" \
+          "https://sonarcloud.io/api/projects/search?projects=${{ secrets.SONAR_ORGANIZATION }}_prj-dast-scm-sast" | \
+          grep -q "total.*0"; then
+          echo "Project does not exist, creating..."
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.SONAR_TOKEN }}" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "name=DAST SCM SAST Application&project=rrddevops_prj-dast-scm-sast&organization=${{ secrets.SONAR_ORGANIZATION }}" \
+            "https://sonarcloud.io/api/projects/create"
+        else
+          echo "Project already exists"
+        fi
+      continue-on-error: true
+    
     - name: SonarQube Scan
       uses: SonarSource/sonarqube-scan-action@master
       env:
@@ -96,6 +113,8 @@ jobs:
           -Dsonar.qualitygate.name=Quality-RRD
           -Dsonar.branch.name=${{ github.ref_name }}
           -Dsonar.branch.target=main
+          -Dsonar.projectName=DAST SCM SAST Application
+          -Dsonar.projectVersion=1.0.0
 
   snyk-security:
     runs-on: ubuntu-latest

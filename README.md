@@ -175,6 +175,7 @@ ZAP scan completed with warnings
 - **Problema**: Acesso negado ao GitHub Container Registry
 - **Solução**: Configurar autenticação ou usar imagem alternativa
 - **Impacto**: Não crítico para o pipeline principal
+- **Workaround**: Relatório vazio é gerado para não quebrar o pipeline
 
 ### ✅ Build & Deploy
 - **Status**: ✅ Container test passou

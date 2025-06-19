@@ -148,6 +148,8 @@ jobs:
     
     - name: Check if application is running
       run: |
+        echo "Building Docker image..."
+        docker build -t dast-scm-sast-app .
         echo "Starting container..."
         docker run -d --name zap-app -p 80:80 dast-scm-sast-app
         sleep 10

@@ -12,7 +12,7 @@ use App\Controllers\UserController;
 
 // Create container
 $containerBuilder = new ContainerBuilder();
-$containerBuilder->addDefinitions(__DIR__ . '/../app/config/container.php');
+$containerBuilder->addDefinitions(require __DIR__ . '/../app/config/container.php');
 $container = $containerBuilder->build();
 
 // Create app

@@ -155,16 +155,16 @@ jobs:
         echo "Building Docker image..."
         docker build -t dast-scm-sast-app .
         echo "Starting container..."
-        docker run -d --name zap-app -p 80:80 dast-scm-sast-app
+        docker run -d --name zap-app -p 8081:80 dast-scm-sast-app
         sleep 10
         echo "Container status:"
         docker ps -a
         echo "Container logs:"
         docker logs zap-app || echo "No container logs found"
         echo "Testing application health..."
-        curl -v http://localhost/health || echo "Application not ready, waiting..."
+        curl -v http://localhost:8081/health || echo "Application not ready, waiting..."
         sleep 10
-        curl -v http://localhost/health || echo "Application still not ready"
+        curl -v http://localhost:8081/health || echo "Application still not ready"
         echo "Final container logs:"
         docker logs zap-app || echo "No container logs found"
     

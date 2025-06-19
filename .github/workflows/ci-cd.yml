@@ -148,6 +148,10 @@ jobs:
     
     - name: Check if application is running
       run: |
+        echo "Cleaning up any existing containers..."
+        docker stop zap-app || true
+        docker rm zap-app || true
+        docker system prune -f || true
         echo "Building Docker image..."
         docker build -t dast-scm-sast-app .
         echo "Starting container..."
@@ -207,6 +211,10 @@ jobs:
     
     - name: Run container tests
       run: |
+        echo "Cleaning up any existing containers..."
+        docker stop test-app || true
+        docker rm test-app || true
+        docker system prune -f || true
         docker run -d --name test-app -p 8080:80 dast-scm-sast-app
         sleep 20
         echo "Container status:"

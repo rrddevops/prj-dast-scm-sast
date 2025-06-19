@@ -27,8 +27,10 @@ COPY composer.json ./
 # Instalar dependências
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Copiar código da aplicação
-COPY . .
+# Copiar código da aplicação (excluindo arquivos desnecessários)
+COPY app/ ./app/
+COPY public/ ./public/
+COPY docker/ ./docker/
 
 # Criar diretório de logs
 RUN mkdir -p app/logs && chmod 755 app/logs

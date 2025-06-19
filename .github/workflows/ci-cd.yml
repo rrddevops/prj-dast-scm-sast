@@ -22,7 +22,7 @@ jobs:
     
     - name: Cache Composer packages
       id: composer-cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: vendor
         key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
@@ -64,7 +64,7 @@ jobs:
         coverage: xdebug
     
     - name: Cache Composer packages
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: vendor
         key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
@@ -89,6 +89,8 @@ jobs:
           -Dsonar.sources=app/src
           -Dsonar.tests=app/tests
           -Dsonar.php.coverage.reportPaths=coverage.xml
+          -Dsonar.coverage.minimum=80
+          -Dsonar.php.coverage.minimum=80
           -Dsonar.host.url=${{ secrets.SONAR_HOST_URL || 'https://sonarcloud.io' }}
           -Dsonar.qualitygate.wait=true
           -Dsonar.qualitygate.name=Quality-RRD
@@ -152,7 +154,7 @@ jobs:
           -m 5
       
     - name: Upload ZAP results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: zap-scan-results

@@ -41,6 +41,17 @@ class UserControllerTest extends TestCase
         $this->assertArrayHasKey('email', $data[0]);
     }
 
+    public function testIndexReturnsValidJson(): void
+    {
+        $request = $this->requestFactory->createServerRequest('GET', '/api/users');
+        $response = $this->responseFactory->createResponse();
+
+        $result = $this->controller->index($request, $response);
+
+        $body = (string) $result->getBody();
+        $this->assertNotFalse(json_decode($body));
+    }
+
     public function testStoreCreatesNewUser(): void
     {
         $userData = ['name' => 'Test User', 'email' => 'test@example.com'];
@@ -75,6 +86,66 @@ class UserControllerTest extends TestCase
         $this->assertArrayHasKey('error', $data);
     }
 
+    public function testStoreReturnsErrorForMissingEmail(): void
+    {
+        $userData = ['name' => 'Test User'];
+        $request = $this->requestFactory->createServerRequest('POST', '/api/users')
+            ->withParsedBody($userData);
+        $response = $this->responseFactory->createResponse();
+
+        $result = $this->controller->store($request, $response);
+
+        $this->assertEquals(400, $result->getStatusCode());
+
+        $data = json_decode((string) $result->getBody(), true);
+        $this->assertArrayHasKey('error', $data);
+    }
+
+    public function testStoreReturnsErrorForEmptyData(): void
+    {
+        $userData = [];
+        $request = $this->requestFactory->createServerRequest('POST', '/api/users')
+            ->withParsedBody($userData);
+        $response = $this->responseFactory->createResponse();
+
+        $result = $this->controller->store($request, $response);
+
+        $this->assertEquals(400, $result->getStatusCode());
+
+        $data = json_decode((string) $result->getBody(), true);
+        $this->assertArrayHasKey('error', $data);
+    }
+
+    public function testStoreReturnsErrorForNullData(): void
+    {
+        $request = $this->requestFactory->createServerRequest('POST', '/api/users')
+            ->withParsedBody(null);
+        $response = $this->responseFactory->createResponse();
+
+        $result = $this->controller->store($request, $response);
+
+        $this->assertEquals(400, $result->getStatusCode());
+
+        $data = json_decode((string) $result->getBody(), true);
+        $this->assertArrayHasKey('error', $data);
+    }
+
+    public function testStoreWithStringValues(): void
+    {
+        $userData = ['name' => '123', 'email' => '456'];
+        $request = $this->requestFactory->createServerRequest('POST', '/api/users')
+            ->withParsedBody($userData);
+        $response = $this->responseFactory->createResponse();
+
+        $result = $this->controller->store($request, $response);
+
+        $this->assertEquals(201, $result->getStatusCode());
+
+        $data = json_decode((string) $result->getBody(), true);
+        $this->assertEquals('123', $data['name']);
+        $this->assertEquals('456', $data['email']);
+    }
+
     public function testShowReturnsUser(): void
     {
         $request = $this->requestFactory->createServerRequest('GET', '/api/users/1');
@@ -103,5 +174,29 @@ class UserControllerTest extends TestCase
 
         $data = json_decode((string) $result->getBody(), true);
         $this->assertArrayHasKey('error', $data);
+    }
+
+    public function testShowWithStringId(): void
+    {
+        $request = $this->requestFactory->createServerRequest('GET', '/api/users/1');
+        $response = $this->responseFactory->createResponse();
+
+        $result = $this->controller->show($request, $response, ['id' => '1']);
+
+        $this->assertEquals(200, $result->getStatusCode());
+
+        $data = json_decode((string) $result->getBody(), true);
+        $this->assertEquals(1, $data['id']);
+    }
+
+    public function testShowReturnsValidJson(): void
+    {
+        $request = $this->requestFactory->createServerRequest('GET', '/api/users/1');
+        $response = $this->responseFactory->createResponse();
+
+        $result = $this->controller->show($request, $response, ['id' => 1]);
+
+        $body = (string) $result->getBody();
+        $this->assertNotFalse(json_decode($body));
     }
 } 

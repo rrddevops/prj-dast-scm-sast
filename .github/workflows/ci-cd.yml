@@ -119,9 +119,11 @@ jobs:
           -Dsonar.qualitygate.name=Quality-RRD
           -Dsonar.branch.name=${{ github.ref_name }}
           -Dsonar.branch.target=main
+          -Dsonar.branch.name=develop 
           -Dsonar.projectName="DAST SCM SAST Application"
           -Dsonar.projectVersion=1.0.0
-      continue-on-error: true
+          continue-on-error: true
+
 
   snyk-security:
     runs-on: ubuntu-latest

@@ -30,9 +30,13 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 # Copiar código da aplicação
 COPY . .
 
+# Criar diretório de logs
+RUN mkdir -p app/logs && chmod 755 app/logs
+
 # Configurar permissões
 RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html
+    && chmod -R 755 /var/www/html \
+    && chmod +x docker/start.sh
 
 # Configurar Nginx
 COPY docker/nginx.conf /etc/nginx/sites-available/default

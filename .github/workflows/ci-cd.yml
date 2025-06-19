@@ -192,12 +192,14 @@ jobs:
     - name: Run container tests
       run: |
         docker run -d --name test-app -p 8080:80 dast-scm-sast-app
-        sleep 15
+        sleep 20
         echo "Testing application health..."
         curl -v http://localhost:8080/health || echo "Health check failed, trying again..."
         sleep 5
         curl -v http://localhost:8080/health || echo "Health check failed again"
         echo "Container logs:"
         docker logs test-app
+        echo "Testing root endpoint:"
+        curl -v http://localhost:8080/ || echo "Root endpoint failed"
         docker stop test-app
         docker rm test-app 

@@ -44,6 +44,9 @@ COPY docker/nginx.conf /etc/nginx/sites-available/default
 # Verificar se os arquivos essenciais existem
 RUN test -f /var/www/html/public/index.php && echo "✅ index.php found" || echo "❌ index.php missing"
 
+# Testar se o PHP pode processar o index.php
+RUN php -l /var/www/html/public/index.php && echo "✅ PHP syntax OK" || echo "❌ PHP syntax error"
+
 # Expor porta
 EXPOSE 80
 

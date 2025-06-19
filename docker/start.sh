@@ -11,8 +11,8 @@ php-fpm -D
 # Aguardar PHP-FPM inicializar
 sleep 3
 
-# Verificar se PHP-FPM está rodando
-if pgrep -f "php-fpm" > /dev/null; then
+# Verificar se PHP-FPM está rodando (usando ps em vez de pgrep)
+if ps aux | grep -v grep | grep "php-fpm" > /dev/null; then
     echo "✅ PHP-FPM is running"
 else
     echo "❌ PHP-FPM failed to start"

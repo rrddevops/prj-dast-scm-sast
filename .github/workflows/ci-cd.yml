@@ -80,6 +80,8 @@ jobs:
     - name: Check SonarCloud project exists
       run: |
         echo "Checking if SonarCloud project exists..."
+        echo "SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}"
+        echo "SONAR_TOKEN: ${{ secrets.SONAR_TOKEN != '' && 'SET' || 'NOT SET' }}"
         if curl -s -H "Authorization: Bearer ${{ secrets.SONAR_TOKEN }}" \
           "https://sonarcloud.io/api/projects/search?projects=${{ secrets.SONAR_ORGANIZATION }}_prj-dast-scm-sast" | \
           grep -q "total.*0"; then
@@ -87,7 +89,7 @@ jobs:
           curl -X POST \
             -H "Authorization: Bearer ${{ secrets.SONAR_TOKEN }}" \
             -H "Content-Type: application/x-www-form-urlencoded" \
-            -d "name=DAST SCM SAST Application&project=rrddevops_prj-dast-scm-sast&organization=${{ secrets.SONAR_ORGANIZATION }}" \
+            -d "name=DAST SCM SAST Application&project=${{ secrets.SONAR_ORGANIZATION }}_prj-dast-scm-sast&organization=${{ secrets.SONAR_ORGANIZATION }}" \
             "https://sonarcloud.io/api/projects/create"
         else
           echo "Project already exists"
@@ -101,8 +103,8 @@ jobs:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       with:
         args: >
-          -Dsonar.projectKey=rrddevops_prj-dast-scm-sast
-          -Dsonar.organization=rrddevops
+          -Dsonar.projectKey=${{ secrets.SONAR_ORGANIZATION }}_prj-dast-scm-sast
+          -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
           -Dsonar.sources=app/src
           -Dsonar.tests=app/tests
           -Dsonar.php.coverage.reportPaths=coverage.xml
@@ -112,7 +114,6 @@ jobs:
           -Dsonar.qualitygate.wait=true
           -Dsonar.qualitygate.name=Quality-RRD
           -Dsonar.branch.name=${{ github.ref_name }}
-          -Dsonar.branch.name=develop 
           -Dsonar.branch.target=main
           -Dsonar.projectName="DAST SCM SAST Application"
           -Dsonar.projectVersion=1.0.0

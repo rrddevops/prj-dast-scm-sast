@@ -21,6 +21,7 @@ Aplicação web PHP/Slim com esteira completa de validação de código incluind
 - Composer
 - Docker
 - Git
+- GPG
 
 ## 🛠️ Instalação
 

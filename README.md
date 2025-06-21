@@ -25,6 +25,18 @@ Aplicação web PHP/Slim com esteira completa de validação de código incluind
 
 ## 🛠️ Instalação
 
+## GPG
+```bash
+Using GPG, SSH:
+gpg --full-generate-key
+gpg --list-secret-keys --keyid-format LONG
+git config --global user.signingkey 77ED0CA4A3529354
+Se estiver no Windows -> git config --global gpg.program "C:/Program Files (x86)/GnuPG/bin/gpg.exe"
+gpg --armor --export 77ED0CA4A3529354
+git config --global commit.gpgsign true   
+git commit -S -m "YOUR_COMMIT_MESSAGE"
+```
+
 ### Desenvolvimento Local
 
 ```bash
@@ -302,10 +314,6 @@ docker push your-registry/dast-scm-sast-app:latest
 docker run -d -p 80:80 --name dast-app dast-scm-sast-app:latest
 ```
 
-## 📝 Licença
-
-MIT License - veja o arquivo LICENSE para detalhes.
-
 ## 🤝 Contribuição
 
 1. Fork o projeto
@@ -313,7 +321,3 @@ MIT License - veja o arquivo LICENSE para detalhes.
 3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
 4. Push para a branch (`git push origin feature/AmazingFeature`)
 5. Abra um Pull Request
-
-## 📞 Suporte
-
-Para suporte, abra uma issue no GitHub ou entre em contato através do email. 

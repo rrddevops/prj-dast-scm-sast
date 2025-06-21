@@ -1,10 +1,15 @@
 name: CI/CD Pipeline
 
+# Workflow triggers:
+# - push to main: Executes all jobs including build-and-deploy (production deployment)
+# - pull_request to main: Executes only validation jobs (code-quality, sonarqube, snyk-security, zap-security)
+#   The build-and-deploy job is skipped for PRs and only runs on direct push to main
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+    types: [ opened, synchronize, reopened ]
 
 jobs:
   code-quality:
@@ -50,6 +55,9 @@ jobs:
   sonarqube:
     runs-on: ubuntu-latest
     needs: code-quality
+    # SonarQube scan runs on both PR and push to main
+    # PR: For quality gate validation
+    # Push: For final analysis and coverage reporting
     
     steps:
     - uses: actions/checkout@v4
@@ -121,6 +129,9 @@ jobs:
 
   snyk-security:
     runs-on: ubuntu-latest
+    # Snyk security scan runs on both PR and push to main
+    # PR: For vulnerability detection before merge
+    # Push: For final security validation
     
     steps:
     - uses: actions/checkout@v4
@@ -149,6 +160,9 @@ jobs:
 
   zap-security:
     runs-on: ubuntu-latest
+    # OWASP ZAP DAST scan runs on both PR and push to main
+    # PR: For dynamic security testing before merge
+    # Push: For final DAST validation
     
     steps:
     - uses: actions/checkout@v4

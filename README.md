@@ -186,6 +186,15 @@ ZAP scan completed with warnings
 
 ## ⚙️ Configuração do GitHub Actions
 
+### Comportamento do Workflow
+
+O workflow CI/CD foi otimizado para evitar execuções duplicadas:
+
+- **Pull Request para `main`**: Executa apenas jobs de validação (code-quality, sonarqube, snyk-security, zap-security)
+- **Push para `main`**: Executa todos os jobs incluindo build e deploy
+
+Para mais detalhes sobre o comportamento do workflow, consulte [docs/workflow-behavior.md](docs/workflow-behavior.md).
+
 ### Secrets Necessários
 
 Configure os seguintes secrets no seu repositório GitHub:
@@ -301,3 +310,7 @@ MIT License - veja o arquivo LICENSE para detalhes.
 3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
 4. Push para a branch (`git push origin feature/AmazingFeature`)
 5. Abra um Pull Request
+
+## 📞 Suporte
+
+Para suporte, abra uma issue no GitHub ou entre em contato através do email. 

@@ -192,6 +192,9 @@ O workflow CI/CD foi otimizado para evitar execuções duplicadas:
 
 - **Pull Request para `main`**: Executa apenas jobs de validação (code-quality, sonarqube, snyk-security, zap-security)
 - **Push para `main`**: Executa todos os jobs incluindo build e deploy
+- **Outras branches** (develop, hotfix, release, feature): Executa apenas jobs básicos (code-quality, snyk-security, zap-security) - **SonarQube é pulado**
+
+**Nota**: O SonarQube só executa na branch `main` e em pull requests para `main`, otimizando o uso de recursos do SonarCloud.
 
 Para mais detalhes sobre o comportamento do workflow, consulte [docs/workflow-behavior.md](docs/workflow-behavior.md).
 

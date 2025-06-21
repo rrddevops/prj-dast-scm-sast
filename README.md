@@ -322,6 +322,5 @@ docker run -d -p 80:80 --name dast-app dast-scm-sast-app:latest
 4. Push para a branch (`git push origin feature/AmazingFeature`)
 5. Abra um Pull Request
 
-## 📞 Suporte
+Seja bem vindo!
 
-Para suporte, abra uma issue no GitHub ou entre em contato através do email. 

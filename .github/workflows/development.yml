@@ -1,0 +1,111 @@
+name: Development Pipeline
+
+on:
+  push:
+    branches: [ develop, hotfix/*, feature/* ]
+  pull_request:
+    branches: [ develop, hotfix/*, feature/* ]
+  workflow_dispatch:
+
+# Prevent concurrent runs on the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  code-quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, iconv, json, mbstring, pdo
+        coverage: xdebug
+    
+    - name: Cache Composer packages
+      id: composer-cache
+      uses: actions/cache@v4
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-
+    
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction
+    
+    - name: Run PHP CS Fixer
+      run: composer format
+    
+    - name: Run PHP CodeSniffer
+      run: composer lint
+    
+    - name: Run PHPStan
+      run: composer stan
+    
+    - name: Run Composer Audit
+      run: composer audit
+    
+    - name: Run tests
+      run: composer test
+
+  quick-security:
+    runs-on: ubuntu-latest
+    needs: code-quality
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, iconv, json, mbstring, pdo
+    
+    - name: Install Composer
+      run: composer self-update
+    
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction
+    
+    - name: Run Snyk to check for vulnerabilities
+      uses: snyk/actions/php@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --severity-threshold=high
+
+  container-test:
+    runs-on: ubuntu-latest
+    needs: [code-quality, quick-security]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Build Docker image
+      run: docker build -t dast-scm-sast-app .
+    
+    - name: Run container tests
+      run: |
+        echo "Cleaning up any existing containers..."
+        docker stop test-app || true
+        docker rm test-app || true
+        docker system prune -f || true
+        docker run -d --name test-app -p 8080:80 dast-scm-sast-app
+        sleep 20
+        echo "Container status:"
+        docker ps -a
+        echo "Testing application health..."
+        curl -v http://localhost:8080/health || echo "Health check failed, trying again..."
+        sleep 5
+        curl -v http://localhost:8080/health || echo "Health check failed again"
+        echo "Container logs:"
+        docker logs test-app || echo "No container logs found"
+        echo "Testing root endpoint:"
+        curl -v http://localhost:8080/ || echo "Root endpoint failed"
+        docker stop test-app
+        docker rm test-app 

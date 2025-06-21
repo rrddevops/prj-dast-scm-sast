@@ -6,7 +6,7 @@ Aplicação web PHP/Slim com esteira completa de validação de código incluind
 
 - **API REST** com Slim Framework
 - **Containerização** com Docker
-- **Esteira CI/CD** com GitHub Actions
+- **Esteira CI/CD** com GitHub Actions (separada para desenvolvimento e produção)
 - **Análise SAST** com SonarQube Cloud
 - **Análise de vulnerabilidades** com Snyk
 - **Testes DAST** com OWASP ZAP
@@ -129,6 +129,37 @@ composer audit
 - Verificação de vulnerabilidades conhecidas
 - Alertas de segurança
 
+## 📊 Estrutura de Workflows
+
+### 🔄 Development Pipeline (`development.yml`)
+**Branches**: `develop`, `hotfix/*`, `feature/*`
+
+Executa em branches de desenvolvimento com verificações rápidas:
+- ✅ **Code Quality** - Linting, testes e auditoria
+- ✅ **Quick Security** - Análise Snyk (vulnerabilidades)
+- ✅ **Container Test** - Build e teste do container
+
+**Tempo estimado**: ~5-8 minutos
+
+### 🚀 Production Pipeline (`ci-cd.yml`)
+**Branches**: `main` (push e PRs)
+
+Executa verificações completas para produção:
+- ✅ **Code Quality** - Linting, testes e auditoria
+- ✅ **SonarQube** - Análise SAST com cobertura
+- ✅ **Snyk Security** - Análise completa de vulnerabilidades
+- ✅ **ZAP Security** - Testes DAST completos
+- ✅ **Build & Deploy** - Build e deploy para produção
+
+**Tempo estimado**: ~15-20 minutos
+
+### 🎯 Benefícios da Separação
+
+1. **Velocidade**: Branches de desenvolvimento executam mais rápido
+2. **Eficiência**: Evita execuções duplicadas
+3. **Controle**: Análises completas apenas para produção
+4. **Concorrência**: Controle de execuções simultâneas por branch
+
 ## 📊 Resultados da Esteira CI/CD
 
 ### ✅ Code Quality
@@ -194,15 +225,29 @@ Configure os seguintes secrets no seu repositório GitHub:
 - `SNYK_TOKEN` - Token do Snyk
 - `SONAR_HOST_URL` - URL do SonarCloud (opcional, padrão: https://sonarcloud.io)
 
-### Workflow
+### Workflows
 
-O workflow executa automaticamente:
+#### Development Pipeline
+Executa automaticamente em branches de desenvolvimento:
+
+1. **Code Quality** - Linting, testes e auditoria
+2. **Quick Security** - Análise Snyk (vulnerabilidades)
+3. **Container Test** - Build e teste do container
+
+#### Production Pipeline
+Executa automaticamente na branch main:
 
 1. **Code Quality** - Linting, testes e auditoria
 2. **SonarQube** - Análise SAST com cobertura
-3. **Snyk Security Scan** - Análise de vulnerabilidades
-4. **OWASP ZAP Security Test** - Testes DAST
-5. **Build & Deploy** - Build e teste do container
+3. **Snyk Security** - Análise completa de vulnerabilidades
+4. **OWASP ZAP Security Test** - Testes DAST completos
+5. **Build & Deploy** - Build e deploy para produção
+
+### Controle de Concorrência
+
+Ambos os workflows incluem controle de concorrência para evitar execuções duplicadas:
+- **Concurrency Group**: Por workflow e branch
+- **Cancel in Progress**: Cancela execuções anteriores da mesma branch
 
 ## 📁 Estrutura do Projeto
 
@@ -229,7 +274,8 @@ prj-dast-scm-sast/
 │   ├── nginx.conf
 │   └── start.sh
 ├── .github/workflows/
-│   └── ci-cd.yml
+│   ├── ci-cd.yml (Production Pipeline)
+│   └── development.yml (Development Pipeline)
 ├── Dockerfile
 ├── docker-compose.yml
 ├── composer.json

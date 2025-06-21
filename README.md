@@ -321,3 +321,5 @@ docker run -d -p 80:80 --name dast-app dast-scm-sast-app:latest
 3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
 4. Push para a branch (`git push origin feature/AmazingFeature`)
 5. Abra um Pull Request
+
+Seja bem vindo!

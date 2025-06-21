@@ -18,11 +18,9 @@ O workflow é executado nos seguintes eventos:
 - **Propósito**: Validação de qualidade de código (PHP CS Fixer, PHPStan, testes)
 
 ### 2. sonarqube
-- **Quando**: Apenas PR para main e Push para main
-- **Propósito**: 
-  - PR: Validação do quality gate
-  - Push: Análise final e relatório de cobertura
-- **Nota**: **NÃO executa** em outras branches como `develop`, `hotfix`, `release`, `feature`
+- **Quando**: Apenas Push direto para main
+- **Propósito**: Análise final e relatório de cobertura
+- **Nota**: **NÃO executa** em pull requests nem em outras branches como `develop`, `hotfix`, `release`, `feature`
 
 ### 3. snyk-security
 - **Quando**: PR e Push para main
@@ -47,9 +45,9 @@ O workflow é executado nos seguintes eventos:
 1. **Criar branch**: `git checkout -b hotfix/critical-fix`
 2. **Fazer commits**: Desenvolver a correção
 3. **Criar PR**: Pull request para `main`
-4. **Workflow executa**: Jobs de validação (1, 3, 4) - **SonarQube executa**
+4. **Workflow executa**: Jobs de validação (1, 3, 4) - **SonarQube NÃO executa**
 5. **Merge**: Quando PR é aprovado e mergeado
-6. **Workflow executa novamente**: Todos os jobs (1-5) incluindo build/deploy
+6. **Workflow executa novamente**: Todos os jobs (1-5) incluindo build/deploy - **SonarQube executa**
 
 ### Cenário 2: Desenvolvimento em Branch Develop
 
@@ -58,7 +56,7 @@ O workflow é executado nos seguintes eventos:
 3. **Push para develop**: `git push origin develop`
 4. **Workflow executa**: Apenas jobs básicos (1, 3, 4) - **SonarQube NÃO executa**
 5. **Criar PR**: Pull request de develop para main
-6. **Workflow executa**: Jobs de validação (1, 3, 4) - **SonarQube executa**
+6. **Workflow executa**: Jobs de validação (1, 3, 4) - **SonarQube NÃO executa**
 
 ### Cenário 3: Push Direto para Main (Não Recomendado)
 
@@ -68,7 +66,7 @@ O workflow é executado nos seguintes eventos:
 ## Otimizações Implementadas
 
 1. **Execução Condicional**: `build-and-deploy` só executa em push para main
-2. **SonarQube Seletivo**: Só executa na main e PRs para main
+2. **SonarQube Restritivo**: Só executa em push direto para main (não em PRs)
 3. **Tipos de PR**: Workflow só executa em PRs `opened`, `synchronize`, `reopened`
 4. **Dependências**: Jobs são executados em paralelo quando possível
 5. **Cache**: Composer e outras dependências são cacheadas
@@ -103,6 +101,7 @@ Se um job específico não está executando:
 
 Se o SonarQube não está executando:
 
-1. **Verifique a branch**: SonarQube só executa na `main` e PRs para `main`
-2. **Verifique o evento**: Deve ser `push` para main ou `pull_request` para main
-3. **Verifique os secrets**: `SONAR_TOKEN` e `SONAR_ORGANIZATION` devem estar configurados 
+1. **Verifique a branch**: SonarQube só executa em push direto para `main`
+2. **Verifique o evento**: Deve ser `push` para main (não `pull_request`)
+3. **Verifique os secrets**: `SONAR_TOKEN` e `SONAR_ORGANIZATION` devem estar configurados
+4. **Nota**: SonarQube **NÃO executa** em pull requests nem em outras branches 

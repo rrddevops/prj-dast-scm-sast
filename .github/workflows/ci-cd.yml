@@ -55,9 +55,9 @@ jobs:
   sonarqube:
     runs-on: ubuntu-latest
     needs: code-quality
-    # SonarQube scan runs only on main branch and PRs to main
-    # Skip on other branches like develop, hotfix, release, feature
-    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+    # SonarQube scan runs ONLY on direct push to main branch
+    # Skip on all other branches and pull requests to avoid unnecessary executions
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
     steps:
     - uses: actions/checkout@v4

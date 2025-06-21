@@ -25,6 +25,18 @@ Aplicação web PHP/Slim com esteira completa de validação de código incluind
 
 ## 🛠️ Instalação
 
+## GPG
+```bash
+Using GPG, SSH:
+gpg --full-generate-key
+gpg --list-secret-keys --keyid-format LONG
+git config --global user.signingkey 77ED0CA4A3529354
+Se estiver no Windows -> git config --global gpg.program "C:/Program Files (x86)/GnuPG/bin/gpg.exe"
+gpg --armor --export 77ED0CA4A3529354
+git config --global commit.gpgsign true   
+git commit -S -m "YOUR_COMMIT_MESSAGE"
+```
+
 ### Desenvolvimento Local
 
 ```bash

@@ -301,7 +301,3 @@ MIT License - veja o arquivo LICENSE para detalhes.
 3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
 4. Push para a branch (`git push origin feature/AmazingFeature`)
 5. Abra um Pull Request
-
-## 📞 Suporte
-
-Para suporte, abra uma issue no GitHub ou entre em contato através do email. 

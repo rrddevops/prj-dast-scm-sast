@@ -104,4 +104,4 @@ Se o SonarQube não está executando:
 1. **Verifique a branch**: SonarQube só executa em push direto para `main`
 2. **Verifique o evento**: Deve ser `push` para main (não `pull_request`)
 3. **Verifique os secrets**: `SONAR_TOKEN` e `SONAR_ORGANIZATION` devem estar configurados
-4. **Nota**: SonarQube **NÃO executa** em pull requests nem em outras branches 
+4. **Nota**: SonarQube **NÃO executa** em pull requests nem em outras branches

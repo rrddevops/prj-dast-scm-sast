@@ -302,10 +302,6 @@ docker push your-registry/dast-scm-sast-app:latest
 docker run -d -p 80:80 --name dast-app dast-scm-sast-app:latest
 ```
 
-## 📝 Licença
-
-MIT License - veja o arquivo LICENSE para detalhes.
-
 ## 🤝 Contribuição
 
 1. Fork o projeto
